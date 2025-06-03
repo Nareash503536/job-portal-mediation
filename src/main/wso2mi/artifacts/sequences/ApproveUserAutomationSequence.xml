@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="ApproveUserAutomationSequence" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <property name="query.param.admin_email" scope="default" type="STRING" value="admin@example.com"/>
+    <property name="query.param.status" scope="default" type="STRING" value="pending"/>
+    <call>
+        <endpoint key="AllUsers"/>
+    </call>
+    <!-- <datamapper config="gov:datamapper/UsersXMLtoJSON/UsersXMLtoJSON.dmc" inputSchema="gov:datamapper/UsersXMLtoJSON/UsersXMLtoJSON_inputSchema.json" inputType="XML" outputSchema="gov:datamapper/UsersXMLtoJSON/UsersXMLtoJSON_outputSchema.json" outputType="JSON"/> -->
+    <log category="INFO" level="full"/>
+    <iterate expression="//users/user" id="IterateByUser" sequential="true">
+        <target>
+            <sequence>
+                <log category="INFO" level="full"/>
+                <property name="uri.var.user_id" scope="default" type="STRING" expression="//id/text()"/>
+                <log category="INFO" level="simple">
+                    <property name="User ID" expression="get-property('uri.var.user_id')"/>
+                </log>
+                <switch  source="fn:boolean( not(//first_name/text()) or   not(//last_name/text()) or   not(//email/text()) or   not(//address/text()) or   not(//date_of_birth/text()) or   not(//profile/summary/text()) or   not(//profile/skills/text()) or   not(//profile/education/text()) or   not(//profile/experience/text()) )">
+                    <case regex="true">
+                        <property name="query.param.admin_email" scope="default" type="STRING" value="admin@example.com"/><!-- Log the values for debugging -->
+                        <!-- Create form data payload -->
+                        <script language="js" ><![CDATA[var admin_email = mc.getProperty('query.param.admin_email');
+            var formData = 'admin_email=' + encodeURIComponent(admin_email);
+            mc.setPayloadJSON({formData: formData});]]></script>
+                        <!-- Set the final form data payload -->
+                        <payloadFactory media-type="text">
+                            <format>$1</format>
+                            <args>
+                                <arg expression="$.formData" evaluator="json"/>
+                            </args>
+                        </payloadFactory>
+                        <property name="ContentType" value="application/x-www-form-urlencoded" scope="axis2"/>
+                        <property name="DISABLE_CHUNKING" value="true" scope="axis2"/>
+                        <call>
+                            <endpoint key="DeleteUser"/>
+                        </call>
+                    </case>
+                    <case regex="false" >
+                        <property name="query.param.email" scope="default" type="STRING" value="admin@example.com"/>
+                        <property name="query.param.password" scope="default" type="STRING" value="adminpass"/>
+                        <script language="js"><![CDATA[var email = mc.getProperty('query.param.email');
+        var password = mc.getProperty('query.param.password');
+        var formData = 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password);
+        mc.setPayloadJSON({formData: formData});]]></script>
+                        <payloadFactory media-type="text">
+                            <format>$1</format>
+                            <args>
+                                <arg expression="$.formData" evaluator="json"/>
+                            </args>
+                        </payloadFactory>
+                        <property name="ContentType" value="application/x-www-form-urlencoded" scope="axis2"/>
+                        <property name="DISABLE_CHUNKING" value="true" scope="axis2"/>
+                        <call>
+                            <endpoint key="ApproveUser"/>
+                        </call>
+                    </case>
+                </switch>
+            </sequence>
+        </target>
+    </iterate>
+    <respond/>
+</sequence>

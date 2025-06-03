@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifacts>
+  <artifact name="gov_datamapper_DatamapperXMLtoJSON_DatamapperXMLtoJSON_dmc" groupId="com.microintegrator.projects" version="1.0.0" type="registry/resource" serverRole="EnterpriseIntegrator">
+    <item>
+      <file>DatamapperXMLtoJSON.dmc</file>
+      <path>/_system/governance/datamapper/DatamapperXMLtoJSON</path>
+      <mediaType>text/plain</mediaType>
+      <properties></properties>
+    </item>
+  </artifact>
+  <artifact name="gov_datamapper_DatamapperXMLtoJSON_DatamapperXMLtoJSON_inputSchema_json" groupId="com.microintegrator.projects" version="1.0.0" type="registry/resource" serverRole="EnterpriseIntegrator">
+    <item>
+      <file>DatamapperXMLtoJSON_inputSchema.json</file>
+      <path>/_system/governance/datamapper/DatamapperXMLtoJSON</path>
+      <mediaType>text/plain</mediaType>
+      <properties></properties>
+    </item>
+  </artifact>
+  <artifact name="gov_datamapper_DatamapperXMLtoJSON_DatamapperXMLtoJSON_outputSchema_json" groupId="com.microintegrator.projects" version="1.0.0" type="registry/resource" serverRole="EnterpriseIntegrator">
+    <item>
+      <file>DatamapperXMLtoJSON_outputSchema.json</file>
+      <path>/_system/governance/datamapper/DatamapperXMLtoJSON</path>
+      <mediaType>text/plain</mediaType>
+      <properties></properties>
+    </item>
+  </artifact>
+  <artifact name="gov_datamapper_DatamapperApplications_DatamapperApplications_dmc" groupId="com.microintegrator.projects" version="1.0.0" type="registry/resource" serverRole="EnterpriseIntegrator">
+    <item>
+      <file>DatamapperApplications.dmc</file>
+      <path>/_system/governance/datamapper/DatamapperApplications</path>
+      <mediaType>text/plain</mediaType>
+      <properties></properties>
+    </item>
+  </artifact>
+  <artifact name="gov_datamapper_DatamapperApplications_DatamapperApplications_inputSchema_json" groupId="com.microintegrator.projects" version="1.0.0" type="registry/resource" serverRole="EnterpriseIntegrator">
+    <item>
+      <file>DatamapperApplications_inputSchema.json</file>
+      <path>/_system/governance/datamapper/DatamapperApplications</path>
+      <mediaType>text/plain</mediaType>
+      <properties></properties>
+    </item>
+  </artifact>
+  <artifact name="gov_datamapper_DatamapperApplications_DatamapperApplications_outputSchema_json" groupId="com.microintegrator.projects" version="1.0.0" type="registry/resource" serverRole="EnterpriseIntegrator">
+    <item>
+      <file>DatamapperApplications_outputSchema.json</file>
+      <path>/_system/governance/datamapper/DatamapperApplications</path>
+      <mediaType>text/plain</mediaType>
+      <properties></properties>
+    </item>
+  </artifact>
+  <artifact name="gov_datamapper_DatamapperUserInfo_DatamapperUserInfo_dmc" groupId="com.microintegrator.projects" version="1.0.0" type="registry/resource" serverRole="EnterpriseIntegrator">
+    <item>
+      <file>DatamapperUserInfo.dmc</file>
+      <path>/_system/governance/datamapper/DatamapperUserInfo</path>
+      <mediaType>text/plain</mediaType>
+      <properties></properties>
+    </item>
+  </artifact>
+  <artifact name="gov_datamapper_DatamapperUserInfo_DatamapperUserInfo_inputSchema_json" groupId="com.microintegrator.projects" version="1.0.0" type="registry/resource" serverRole="EnterpriseIntegrator">
+    <item>
+      <file>DatamapperUserInfo_inputSchema.json</file>
+      <path>/_system/governance/datamapper/DatamapperUserInfo</path>
+      <mediaType>text/plain</mediaType>
+      <properties></properties>
+    </item>
+  </artifact>
+  <artifact name="gov_datamapper_DatamapperUserInfo_DatamapperUserInfo_outputSchema_json" groupId="com.microintegrator.projects" version="1.0.0" type="registry/resource" serverRole="EnterpriseIntegrator">
+    <item>
+      <file>DatamapperUserInfo_outputSchema.json</file>
+      <path>/_system/governance/datamapper/DatamapperUserInfo</path>
+      <mediaType>text/plain</mediaType>
+      <properties></properties>
+    </item>
+  </artifact>
+  <artifact name="gov_datamapper_UsersXMLtoJSON_UsersXMLtoJSON_dmc" groupId="com.microintegrator.projects" version="1.0.0" type="registry/resource" serverRole="EnterpriseIntegrator">
+    <item>
+      <file>UsersXMLtoJSON.dmc</file>
+      <path>/_system/governance/datamapper/UsersXMLtoJSON</path>
+      <mediaType>text/plain</mediaType>
+      <properties></properties>
+    </item>
+  </artifact>
+  <artifact name="gov_datamapper_UsersXMLtoJSON_UsersXMLtoJSON_inputSchema_json" groupId="com.microintegrator.projects" version="1.0.0" type="registry/resource" serverRole="EnterpriseIntegrator">
+    <item>
+      <file>UsersXMLtoJSON_inputSchema.json</file>
+      <path>/_system/governance/datamapper/UsersXMLtoJSON</path>
+      <mediaType>text/plain</mediaType>
+      <properties></properties>
+    </item>
+  </artifact>
+  <artifact name="gov_datamapper_UsersXMLtoJSON_UsersXMLtoJSON_outputSchema_json" groupId="com.microintegrator.projects" version="1.0.0" type="registry/resource" serverRole="EnterpriseIntegrator">
+    <item>
+      <file>UsersXMLtoJSON_outputSchema.json</file>
+      <path>/_system/governance/datamapper/UsersXMLtoJSON</path>
+      <mediaType>text/plain</mediaType>
+      <properties/>
+    </item>
+  </artifact>
+</artifacts>

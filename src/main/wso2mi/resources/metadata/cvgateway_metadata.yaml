@@ -1,0 +1,10 @@
+---
+key: "cvgateway-1.0.0"
+name : "cvgateway"
+displayName : "cvgateway"
+description: "cvgateway"
+version: "1.0.0"
+serviceUrl: "https://{MI_HOST}:{MI_PORT}/cvgateway"
+definitionType: "OAS3"
+securityType: "BASIC"
+mutualSSLEnabled: false

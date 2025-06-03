@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <api context="/cvgateway" name="cvgateway" xmlns="http://ws.apache.org/ns/synapse">
+         <resource methods="GET" uri-template="/jobs/{job_id}/applications?email={email}&amp;password={password}">
+            <inSequence>
+            <call>
+                <endpoint key="ApplicationsPerJob"/>
+            </call>
+            <datamapper config="gov:datamapper/DatamapperXMLtoJSON/DatamapperXMLtoJSON.dmc" inputSchema="gov:datamapper/DatamapperXMLtoJSON/DatamapperXMLtoJSON_inputSchema.json" inputType="XML" outputSchema="gov:datamapper/DatamapperXMLtoJSON/DatamapperXMLtoJSON_outputSchema.json" outputType="JSON"/>
+            <respond/>
+        </inSequence>
+            <faultSequence>
+        </faultSequence>
+    </resource>
+        <resource methods="GET" uri-template="/jobs?email={email}&amp;password={password}">
+            <inSequence>
+            <call>
+                <endpoint key="ApplicationsPerCandidate"/>
+            </call>
+            <datamapper config="gov:datamapper/DatamapperApplications/DatamapperApplications.dmc" inputSchema="gov:datamapper/DatamapperApplications/DatamapperApplications_inputSchema.json" inputType="XML" outputSchema="gov:datamapper/DatamapperApplications/DatamapperApplications_outputSchema.json" outputType="JSON"/>
+            <foreach expression="json-eval($.application)">
+                <sequence>
+                    <switch source="json-eval($.status)">
+                        <case regex="rejected">
+                            <payloadFactory media-type="json">
+                                <format>
+                                    {
+                                    "message": "Unfortunately, you were not selected for this position.",
+                                    "job_title": "$1",
+                                    "company": "$2"
+                                    }
+                                </format>
+                                <args>
+                                    <arg evaluator="json" expression="$.job_title"/>
+                                    <arg evaluator="json" expression="$.company"/>
+                                </args>
+                            </payloadFactory>
+                        </case>
+                        <case regex="approved">
+                            <payloadFactory media-type="json">
+                                <format>
+                                    {
+                                    "message": "Congratulations! You have been selected for the position of $1 at $2",
+                                    "job_title": "$1",
+                                    "company": "$2"
+                                    }
+                                </format>
+                                <args>
+                                    <arg evaluator="json" expression="$.job_title"/>
+                                    <arg evaluator="json" expression="$.company"/>
+                                </args>
+                            </payloadFactory>
+                        </case>
+                        <case regex="pending">
+                            <payloadFactory media-type="json">
+                                <format>
+                                    {
+                                    "message": "Your application is still under review. We will get back to you soon.",
+                                    "job_title": "$1",
+                                    "company": "$2"
+                                    }
+                                </format>
+                                <args>
+                                    <arg evaluator="json" expression="$.job_title"/>
+                                    <arg evaluator="json" expression="$.company"/>
+                                </args>
+                            </payloadFactory>
+                        </case>
+                    </switch>
+                </sequence>
+            </foreach>
+            <respond/>
+        </inSequence>
+            <faultSequence>
+        </faultSequence>
+    </resource>
+    <resource methods="POST" uri-template="/users?email={email}&amp;password={password}&amp;first_name={first_name}&amp;last_name={last_name}&amp;date_of_birth={date_of_birth}&amp;address={address}">
+        <inSequence>
+            <property expression="get-property('query.param.email')" name="email" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.password')" name="password" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.first_name')" name="first_name" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.last_name')" name="last_name" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.date_of_birth')" name="date_of_birth" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.address')" name="address" scope="default" type="STRING"/>
+            <script language="js"><![CDATA[var email = mc.getProperty('email');
+var password = mc.getProperty('password');
+var first_name = mc.getProperty('first_name');
+var last_name = mc.getProperty('last_name');
+var date_of_birth = mc.getProperty('date_of_birth');
+var address = mc.getProperty('address');
+var formData = 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password) + '&first_name=' + encodeURIComponent(first_name) + '&last_name=' + encodeURIComponent(last_name) + '&date_of_birth=' + encodeURIComponent(date_of_birth) + '&address=' + encodeURIComponent(address);
+mc.setPayloadJSON({formData: formData});]]></script>
+            <payloadFactory media-type="text">
+                <format>$1</format>
+                <args>
+                    <arg expression="$.formData" evaluator="json"/>
+                </args>
+            </payloadFactory>
+            <property name="ContentType" value="application/x-www-form-urlencoded" scope="axis2"/>
+            <property name="DISABLE_CHUNKING" value="true" scope="axis2"/>
+            <call>
+                <endpoint key="CreateUser"/>
+            </call>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+        </faultSequence>
+    </resource>
+    <resource methods="PUT" uri-template="/users/{user_id}/approve?email={email}&amp;password={password}">
+        <inSequence>
+            <property name="email" scope="default" type="STRING" expression="get-property('query.param.email')"/>
+            <property name="password" scope="default" type="STRING" expression="get-property('query.param.password')"/>
+            <!-- Create form data payload -->
+            <script language="js" ><![CDATA[var email = mc.getProperty('email');
+var password = mc.getProperty('password');
+var formData = 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password);
+mc.setPayloadJSON({formData: formData});]]></script>
+            <!-- Set the final form data payload -->
+            <payloadFactory media-type="text">
+                <format>$1</format>
+                <args>
+                    <arg expression="$.formData" evaluator="json"/>
+                </args>
+            </payloadFactory>
+            <property name="ContentType" value="application/x-www-form-urlencoded" scope="axis2"/>
+            <property name="DISABLE_CHUNKING" value="true" scope="axis2"/>
+            <call>
+                <endpoint key="ApproveUser"/>
+            </call>
+            <call>
+                <endpoint key="PeruserDetails"/>
+            </call>
+            <!-- <datamapper config="gov:datamapper/DatamapperUserInfo/DatamapperUserInfo.dmc" inputSchema="gov:datamapper/DatamapperUserInfo/DatamapperUserInfo_inputSchema.json" inputType="XML" outputSchema="gov:datamapper/DatamapperUserInfo/DatamapperUserInfo_outputSchema.json" outputType="JSON"/> -->
+            <dataServiceCall serviceName="PortalService">
+                <operations type="single">
+                    <operation name="insertApprovedUser">
+                        <param name="email" expression="//email" evaluator="xml"/>
+                        <param name="first_name" expression="//first_name" evaluator="xml"/>
+                        <param name="last_name" expression="//last_name" evaluator="xml"/>
+                        <param name="date_of_birth" expression="//date_of_birth" evaluator="xml"/>
+                        <param name="address" expression="//address" evaluator="xml"/>
+                        <param name="status" expression="//status" evaluator="xml"/>
+                        <param name="summary" expression="//summary" evaluator="xml"/>
+                        <param name="skills" expression="//skills" evaluator="xml"/>
+                        <param name="education" expression="//education" evaluator="xml"/>
+                        <param name="experience" expression="//experience" evaluator="xml"/>
+                    </operation>
+                </operations>
+                <source type="inline"/>
+                <target type="body"/>
+            </dataServiceCall>
+            <payloadFactory  media-type="json" template-type="default">
+    
+    <format>{ "status": "success", "message": "User inserted successfully" }
+</format>
+    <args>
+                </args>
+            </payloadFactory>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+        <log level="full">
+                <property name="ERROR" expression="get-property('ERROR_MESSAGE')"/>
+            </log>
+            <payloadFactory media-type="json">
+                <format>{ "status": "error", "message": "$1" }</format>
+                <args>
+                    <arg expression="get-property('ERROR_MESSAGE')"/>
+                </args>
+            </payloadFactory>
+            <respond/>
+        </faultSequence>
+    </resource>
+    <resource methods="PUT" uri-template="/users/{user_id}?email={email}&amp;password={password}&amp;first_name={first_name}&amp;last_name={last_name}&amp;date_of_birth={date_of_birth}&amp;address={address}&amp;summary={summary}&amp;skills={skills}&amp;education={education}&amp;experience={experience}">
+        <inSequence>
+            <property expression="get-property('query.param.email')" name="email" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.password')" name="password" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.first_name')" name="first_name" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.last_name')" name="last_name" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.date_of_birth')" name="date_of_birth" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.address')" name="address" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.summary')" name="summary" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.skills')" name="skills" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.education')" name="education" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.experience')" name="experience" scope="default" type="STRING"/>
+            <script language="js"><![CDATA[var email = mc.getProperty('email');
+var password = mc.getProperty('password');
+var first_name = mc.getProperty('first_name');
+var last_name = mc.getProperty('last_name');
+var date_of_birth = mc.getProperty('date_of_birth');
+var address = mc.getProperty('address');
+var summary = mc.getProperty('summary');
+var skills = mc.getProperty('skills');
+var education = mc.getProperty('education');
+var experience = mc.getProperty('experience');
+var formData = 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password) + '&first_name=' + encodeURIComponent(first_name) + '&last_name=' + encodeURIComponent(last_name) + '&date_of_birth=' + encodeURIComponent(date_of_birth) + '&address=' + encodeURIComponent(address) + '&summary=' + encodeURIComponent(summary) + '&skills=' + encodeURIComponent(skills) + '&education=' + encodeURIComponent(education) + '&experience=' + encodeURIComponent(experience);
+mc.setPayloadJSON({formData: formData});]]></script>
+            <payloadFactory media-type="text">
+                <format>$1</format>
+                <args>
+                    <arg expression="$.formData" evaluator="json"/>
+                </args>
+            </payloadFactory>
+            <property name="ContentType" value="application/x-www-form-urlencoded" scope="axis2"/>
+            <property name="DISABLE_CHUNKING" value="true" scope="axis2"/>
+            <call>
+                <endpoint key="UpdateUser"/>
+            </call>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+        </faultSequence>
+    </resource>
+        <resource methods="POST" uri-template="/jobs/{user_id}/apply?email={email}&amp;password={password}">
+            <inSequence>
+            <property expression="get-property('query.param.email')" name="email" scope="default" type="STRING"/>
+            <property name="password" scope="default" type="STRING" expression="get-property('query.param.password')"/>
+            <!-- Create form data payload -->
+        <script language="js"><![CDATA[
+        var email = mc.getProperty('email');
+        var password = mc.getProperty('password');
+        var formData = 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password);
+        mc.setPayloadJSON({formData: formData});
+        ]]></script>
+            <!-- Set the final form data payload -->
+            <payloadFactory media-type="text">
+                <format>$1</format>
+                <args>
+                    <arg expression="$.formData" evaluator="json"/>
+                </args>
+            </payloadFactory>
+            <property name="ContentType" value="application/x-www-form-urlencoded" scope="axis2"/>
+            <property name="DISABLE_CHUNKING" value="true" scope="axis2"/>
+            <call >
+                <endpoint key="ApplyForJob"/>
+            </call>
+            <respond/>
+        </inSequence>
+            <faultSequence>
+        </faultSequence>
+    </resource>
+    <resource methods="PUT" uri-template="/jobs/{job_id}?email={email}&amp;password={password}&amp;title={title}&amp;company={company}&amp;description={description}&amp;required_skills={required_skills}&amp;posting_date={posting_date}">
+        <inSequence>
+            <property expression="get-property('query.param.email')" name="email" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.password')" name="password" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.title')" name="title" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.company')" name="company" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.description')" name="description" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.required_skills')" name="required_skills" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.posting_date')" name="posting_date" scope="default" type="STRING"/>
+            <script language="js"><![CDATA[var email = mc.getProperty('email');
+var password = mc.getProperty('password');
+var first_name = mc.getProperty('first_name');
+var title = mc.getProperty('title');
+var company = mc.getProperty('company');
+var description = mc.getProperty('description');
+var required_skills = mc.getProperty('required_skills');
+var posting_date = mc.getProperty('posting_date');
+var formData = 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password) + '&title=' + encodeURIComponent(title) + '&company=' + encodeURIComponent(company) + '&description=' + encodeURIComponent(description) + '&required_skills=' + encodeURIComponent(required_skills) + '&posting_date=' + encodeURIComponent(posting_date);
+mc.setPayloadJSON({formData: formData});]]></script>
+            <payloadFactory media-type="text">
+                <format>$1</format>
+                <args>
+                    <arg expression="$.formData" evaluator="json"/>
+                </args>
+            </payloadFactory>
+            <property name="ContentType" value="application/x-www-form-urlencoded" scope="axis2"/>
+            <property name="DISABLE_CHUNKING" value="true" scope="axis2"/>
+            <call>
+                <endpoint key="UpdateJob"/>
+            </call>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+        </faultSequence>
+    </resource>
+    <resource methods="POST" uri-template="/jobs?email={email}&amp;password={password}&amp;title={title}&amp;company={company}&amp;description={description}&amp;required_skills={required_skills}&amp;posting_date={posting_date}">
+        <inSequence>
+            <property expression="get-property('query.param.email')" name="email" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.password')" name="password" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.title')" name="title" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.company')" name="company" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.description')" name="description" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.required_skills')" name="required_skills" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.posting_date')" name="address" scope="default" type="STRING"/>
+            <script language="js"><![CDATA[var email = mc.getProperty('email');
+var password = mc.getProperty('password');
+var first_name = mc.getProperty('first_name');
+var title = mc.getProperty('title');
+var company = mc.getProperty('company');
+var description = mc.getProperty('description');
+var required_skills = mc.getProperty('required_skills');
+var posting_date = mc.getProperty('posting_date');
+var formData = 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password) + '&title=' + encodeURIComponent(title) + '&company=' + encodeURIComponent(company) + '&description=' + encodeURIComponent(description) + '&required_skills=' + encodeURIComponent(required_skills) + '&posting_date=' + encodeURIComponent(posting_date);
+mc.setPayloadJSON({formData: formData});]]></script>
+            <payloadFactory media-type="text">
+                <format>$1</format>
+                <args>
+                    <arg expression="$.formData" evaluator="json"/>
+                </args>
+            </payloadFactory>
+            <property name="ContentType" value="application/x-www-form-urlencoded" scope="axis2"/>
+            <property name="DISABLE_CHUNKING" value="true" scope="axis2"/>
+            <call>
+                <endpoint key="CreateJob"/>
+            </call>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+        </faultSequence>
+    </resource>
+        <resource methods="DELETE" uri-template="/users/{user_id}?admin_email={admin_email}">
+            <inSequence>
+            <property name="admin_email" scope="default" type="STRING" expression="get-property('query.param.admin_email')"/><!-- Log the values for debugging -->
+            <!-- Create form data payload -->
+            <script language="js"><![CDATA[var admin_email = mc.getProperty('admin_email');
+var formData = 'admin_email=' + encodeURIComponent(admin_email);
+mc.setPayloadJSON({formData: formData});]]></script>
+            <!-- Set the final form data payload -->
+            <payloadFactory media-type="text">
+                <format>$1</format>
+                <args>
+                    <arg expression="$.formData" evaluator="json"/>
+                </args>
+            </payloadFactory>
+            <property name="ContentType" value="application/x-www-form-urlencoded" scope="axis2"/>
+            <property name="DISABLE_CHUNKING" value="true" scope="axis2"/>
+            <call>
+                <endpoint key="DeleteUser"/>
+            </call>
+            <respond/>
+        </inSequence>
+            <faultSequence>
+        </faultSequence>
+    </resource>
+        <resource methods="DELETE" uri-template="/jobs/{job_id}?email={email}&amp;password={password}">
+            <inSequence>
+            <property name="email" scope="default" type="STRING" expression="get-property('query.param.email')"/><!-- Log the values for debugging -->
+            <property name="password" scope="default" type="STRING" expression="get-property('query.param.password')"/><!-- Log the values for debugging -->
+            <!-- Create form data payload -->
+            <script language="js"><![CDATA[var email = mc.getProperty('email');
+var password = mc.getProperty('password');
+var formData = '&email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password);
+mc.setPayloadJSON({formData: formData});]]></script>
+            <!-- Set the final form data payload -->
+            <payloadFactory media-type="text">
+                <format>$1</format>
+                <args>
+                    <arg expression="$.formData" evaluator="json"/>
+                </args>
+            </payloadFactory>
+            <property name="ContentType" value="application/x-www-form-urlencoded" scope="axis2"/>
+            <property name="DISABLE_CHUNKING" value="true" scope="axis2"/>
+            <call>
+                <endpoint key="DeleteJob"/>
+            </call>
+            <respond/>
+        </inSequence>
+            <faultSequence>
+        </faultSequence>
+    </resource>
+        <resource methods="PUT" uri-template="/applications/{application_id}/{action}?email={email}&amp;password={password}">
+            <inSequence>
+            <property expression="get-property('query.param.email')" name="email" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.password')" name="password" scope="default" type="STRING"/>
+                <script language="js"><![CDATA[var email = mc.getProperty('email');
+                    var password = mc.getProperty('password');
+                    var formData = 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password);
+                    mc.setPayloadJSON({formData: formData});]]>
+                </script>
+                <payloadFactory media-type="text">
+                    <format>$1</format>
+                    <args>
+                    <arg expression="$.formData" evaluator="json"/>
+                </args>
+            </payloadFactory>
+            <property name="ContentType" value="application/x-www-form-urlencoded" scope="axis2"/>
+            <property name="DISABLE_CHUNKING" value="true" scope="axis2"/>
+                <call>
+                <endpoint key="RejectOrApproveApplication"/>
+            </call>
+            <respond/>
+        </inSequence>
+            <faultSequence>
+        </faultSequence>
+    </resource>
+    <resource methods="PUT" uri-template="/users/{user_id}/role?admin_email={admin_email}&amp;role={role}">
+        <inSequence>
+            <property expression="get-property('query.param.admin_email')" name="admin_email" scope="default" type="STRING"/>
+            <property expression="get-property('query.param.role')" name="role" scope="default" type="STRING"/>
+            <script language="js"><![CDATA[var admin_email = mc.getProperty('admin_email');
+                    var role = mc.getProperty('role');
+                    var formData = 'admin_email=' + encodeURIComponent(admin_email) + '&role=' + encodeURIComponent(role);
+                    mc.setPayloadJSON({formData: formData});]]>
+                </script>
+            <payloadFactory media-type="text">
+                <format>$1</format>
+                <args>
+                    <arg expression="$.formData" evaluator="json"/>
+                </args>
+            </payloadFactory>
+            <property name="ContentType" value="application/x-www-form-urlencoded" scope="axis2"/>
+            <property name="DISABLE_CHUNKING" value="true" scope="axis2"/>
+            <call>
+                <endpoint key="AssignRole"/>
+            </call>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+        </faultSequence>
+    </resource>
+    <resource methods="GET" uri-template="/users?admin_email={admin_email}&amp;status={status}">
+        <inSequence>
+            <call>
+                <endpoint key="AllUsers"/>
+            </call>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+        </faultSequence>
+    </resource>
+    <resource methods="GET" uri-template="/users/{user_id}?email={email}&amp;password={password}">
+        <inSequence>
+            <call>
+                <endpoint key="PeruserDetails"/>
+            </call>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+        </faultSequence>
+    </resource>
+    <resource methods="GET" uri-template="/applications?email={email}&amp;password={password}">
+        <inSequence>
+        <call >
+                <endpoint key="ApplicationsPerCandidate"/>
+            </call>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+        </faultSequence>
+    </resource>
+    <resource methods="PUT" uri-template="/jobs/{job_id}/approve?admin_email={admin_email}">
+        <inSequence>
+            <property expression="get-property('query.param.admin_email')" name="admin_email" scope="default" type="STRING"/>
+            <script language="js"><![CDATA[var admin_email = mc.getProperty('admin_email');
+                var formData = 'admin_email=' + encodeURIComponent(admin_email);
+                mc.setPayloadJSON({formData: formData});]]>
+            </script>
+            <payloadFactory media-type="text">
+                <format>$1</format>
+                <args>
+                    <arg expression="$.formData" evaluator="json"/>
+                </args>
+            </payloadFactory>
+            <property name="ContentType" value="application/x-www-form-urlencoded" scope="axis2"/>
+            <property name="DISABLE_CHUNKING" value="true" scope="axis2"/>
+            <call>
+                <endpoint key="ApproveJob"/>
+            </call>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+        </faultSequence>
+    </resource>
+    <resource methods="PUT" uri-template="/active/users?email={email}">
+        <inSequence>
+            <dataServiceCall serviceName="PortalService">
+                <operations type="single">
+                    <operation name="updateApprovedUser">
+                        <param name="company_contact_email" expression="//company_contact_email" evaluator="xml"/>
+                        <param name="company_contact_number" expression="//company_contact_number" evaluator="xml"/>
+                        <param name="job_start_date" expression="//job_start_date" evaluator="xml"/>
+                        <param name="selected_date" expression="//selected_date" evaluator="xml"/>
+                        <param name="email" expression="$url:email" evaluator="xml"/>
+                    </operation>
+                </operations>
+                <source type="inline"/>
+                <target type="body"/>
+            </dataServiceCall>
+            <payloadFactory media-type="json" template-type="default">
+                <format>{ "status": "success", "message": "User updated successfully" }</format>
+                <args/>
+            </payloadFactory>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+            <log level="full">
+                <property name="ERROR" expression="get-property('ERROR_MESSAGE')"/>
+            </log>
+            <payloadFactory media-type="json">
+                <format>{ "status": "error", "message": "$1" }</format>
+                <args>
+                    <arg expression="get-property('ERROR_MESSAGE')"/>
+                </args>
+            </payloadFactory>
+            <respond/>
+        </faultSequence>
+    </resource>
+</api>

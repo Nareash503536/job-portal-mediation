@@ -1,0 +1,75 @@
+<data name="PortalService" serviceNamespace="" serviceGroup="" transports="http https" disableStreaming="true">
+    <description/>
+    <config id="ApprovedUserDataStore">
+        <property name="driverClassName">com.mysql.jdbc.Driver</property>
+        <property name="url">jdbc:mysql://localhost:3306/portal_db</property>
+        <property name="username">root</property>
+    </config>
+    <query id="insert_users_query" useConfig="ApprovedUserDataStore">
+        <sql>INSERT INTO users (address,date_of_birth,profile_skills,last_name,profile_summary,profile_education,profile_experience,first_name,email,status) VALUES (?,?,?,?,?,?,?,?,?,?)</sql>
+        <param name="address" ordinal="1" paramType="SCALAR" sqlType="STRING" type="IN"/>
+        <param name="date_of_birth" ordinal="2" paramType="SCALAR" sqlType="DATE" type="IN"/>
+        <param name="profile_skills" ordinal="3" paramType="SCALAR" sqlType="STRING" type="IN"/>
+        <param name="last_name" ordinal="4" paramType="SCALAR" sqlType="STRING" type="IN"/>
+        <param name="profile_summary" ordinal="5" paramType="SCALAR" sqlType="STRING" type="IN"/>
+        <param name="profile_education" ordinal="6" paramType="SCALAR" sqlType="STRING" type="IN"/>
+        <param name="profile_experience" ordinal="7" paramType="SCALAR" sqlType="STRING" type="IN"/>
+        <param name="first_name" ordinal="8" paramType="SCALAR" sqlType="STRING" type="IN"/>
+        <param name="email" ordinal="9" paramType="SCALAR" sqlType="STRING" type="IN"/>
+        <param name="status" ordinal="10" paramType="SCALAR" sqlType="STRING" type="IN"/>
+    </query>
+    <operation name="insertApprovedUser">
+        <call-query href="insert_users_query">
+            <with-param name="address" query-param="address"/>
+            <with-param name="date_of_birth" query-param="date_of_birth"/>
+            <with-param name="profile_skills" query-param="skills"/>
+            <with-param name="last_name" query-param="last_name"/>
+            <with-param name="profile_summary" query-param="summary"/>
+            <with-param name="profile_education" query-param="education"/>
+            <with-param name="profile_experience" query-param="experience"/>
+            <with-param name="first_name" query-param="first_name"/>
+            <with-param name="email" query-param="email"/>
+            <with-param name="status" query-param="status"/>
+        </call-query>
+    </operation>
+    <resource method="POST" path="users">
+        <call-query href="insert_users_query">
+            <with-param name="address" query-param="address"/>
+            <with-param name="date_of_birth" query-param="date_of_birth"/>
+            <with-param name="profile_skills" query-param="skills"/>
+            <with-param name="last_name" query-param="last_name"/>
+            <with-param name="profile_summary" query-param="summary"/>
+            <with-param name="profile_education" query-param="education"/>
+            <with-param name="profile_experience" query-param="experience"/>
+            <with-param name="first_name" query-param="first_name"/>
+            <with-param name="email" query-param="email"/>
+            <with-param name="status" query-param="status"/>
+        </call-query>
+    </resource>
+    <query id="update_users_query" useConfig="ApprovedUserDataStore">
+        <sql>UPDATE users SET  company_contact_email=?, company_contact_number=?, job_start_date=?, selected_date=? WHERE email=?</sql>
+        <param name="company_contact_email" ordinal="1" paramType="SCALAR" sqlType="STRING" type="IN"/>
+        <param name="company_contact_number" ordinal="2" paramType="SCALAR" sqlType="STRING" type="IN"/>
+        <param name="job_start_date" ordinal="3" paramType="SCALAR" sqlType="DATE" type="IN"/>
+        <param name="selected_date" ordinal="4" paramType="SCALAR" sqlType="DATE" type="IN"/>
+        <param name="email" ordinal="5" paramType="SCALAR" sqlType="STRING" type="IN"/>
+    </query>
+    <operation name="updateApprovedUser">
+        <call-query href="update_users_query">
+            <with-param name="company_contact_email" query-param="company_contact_email"/>
+            <with-param name="company_contact_number" query-param="company_contact_number"/>
+            <with-param name="job_start_date" query-param="job_start_date"/>
+            <with-param name="selected_date" query-param="selected_date"/>
+            <with-param name="email" query-param="email"/>
+        </call-query>
+    </operation>
+    <resource method="PUT" path="users">
+        <call-query href="update_users_query">
+            <with-param name="company_contact_email" query-param="company_contact_email"/>
+            <with-param name="company_contact_number" query-param="company_contact_number"/>
+            <with-param name="job_start_date" query-param="job_start_date"/>
+            <with-param name="selected_date" query-param="selected_date"/>
+            <with-param name="email" query-param="email"/>
+        </call-query>
+    </resource>
+</data>
